@@ -77,6 +77,60 @@ Create a JSON file (backend-task-definition.json) for the backend service with t
   ]
 }
 ```
+To replace the placeholders in your configuration, follow these steps:
+
+1.  **Replace `<ecs_task_execution_role>`:**
+    * Locate the ARN (Amazon Resource Name) of your ECS task execution IAM role. This role grants the ECS agent permissions to make calls to AWS APIs on your behalf.
+    * Replace the text `<ecs_task_execution_role>` with the actual ARN.
+    * **Example:** `arn:aws:iam::123456789012:role/ecsTaskExecutionRole`
+
+2.  **Replace `<ecs_task_role>`:**
+    * Locate the ARN of your ECS task IAM role specifically for your backend application. This role grants permissions to the containers in your backend task.
+    * Replace the text `<ecs_task_role>` with the actual ARN.
+    * **Example:** `arn:aws:iam::123456789012:role/backendTaskRole`
+
+3.  **Replace `<aws_account_id>`:**
+    * Find your 12-digit AWS account ID. You can typically find this in the AWS Management Console.
+    * Replace the text `<aws_account_id>` with your actual AWS account ID.
+    * **Example:** `123456789012`
+
+4.  **Replace `<region>`:**
+    * Specify the AWS region where your ECS cluster and resources are located (e.g., `us-east-1`, `eu-west-2`, `ap-southeast-2`).
+    * Replace the text `<region>` with your desired AWS region.
+    * **Example:** `us-west-2`
+
+5.  **Replace `<google_api_key>`:**
+    * Obtain your Google API key.
+    * **Instead of hardcoding directly, consider using AWS Secrets Manager for better security:**
+        * **Option 1: Using AWS Secrets Manager (Recommended)**
+            1.  Store your Google API key as a secret in AWS Secrets Manager.
+            2.  In your ECS task definition, configure an environment variable that retrieves the secret value from Secrets Manager. You'll need to define the `valueFrom` field in your container definition.
+            3.  Replace `<google_api_key>` with the ARN of the secret you created in AWS Secrets Manager (or the appropriate Secrets Manager reference in your task definition).
+            * **Example (in task definition environment variable):**
+                ```json
+                "environment": [
+                  {
+                    "name": "GOOGLE_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-west-2:123456789012:secret:my-google-api-key:SecretString:apiKey"
+                  }
+                ]
+                ```
+        * **Option 2: Hardcoding (Less Secure - Use with Caution)**
+            * Replace the text `<google_api_key>` with your actual Google API key.
+            * **Example:** `AIzaSy***************************************`
+
+**Summary of Replacements (Example):**
+
+Let's say your actual values are:
+
+* ECS Task Execution Role ARN: `arn:aws:iam::987654321098:role/my-ecs-task-execution-role`
+* ECS Task Role ARN: `arn:aws:iam::987654321098:role/my-backend-task-role`
+* AWS Account ID: `987654321098`
+* AWS Region: `ap-southeast-1`
+* Google API Key (stored in Secrets Manager with ARN): `arn:aws:secretsmanager:ap-southeast-1:987654321098:secret:google-maps-key`
+
+Then, the replacements would look like this:
+
 #### 1.2.2 Frontend Task Definition
 Similarly, create a frontend-task-definition.json for the frontend service:
 

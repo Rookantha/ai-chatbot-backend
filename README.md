@@ -171,7 +171,7 @@ Register the ECS task definitions with the following commands:
 aws ecs register-task-definition --cli-input-json file://backend-task-definition.json
 aws ecs register-task-definition --cli-input-json file://frontend-task-definition.json
 ```
-## 1.3 Setting Up an ECS Cluster
+### 1.3 Setting Up an ECS Cluster
 
 This section guides you through the process of creating an Amazon ECS (Elastic Container Service) cluster, which is a logical grouping of container instances that you can use to run tasks. For this chatbot application, we'll use the Fargate launch type, which allows you to run containers without managing the underlying EC2 instances.
 
@@ -191,7 +191,7 @@ This section guides you through the process of creating an Amazon ECS (Elastic C
 
 5.  **Click "Create":** After configuring the cluster settings, review your choices and click the "Create" button to provision your ECS cluster. The cluster will be created within a few minutes.
 
-## 1.4 Creating ECS Services for Frontend and Backend
+### 1.4 Creating ECS Services for Frontend and Backend
 
 An ECS service manages the running of tasks of a specific task definition within your cluster. It ensures that the desired number of tasks are running and automatically replaces any tasks that fail. You'll need to create separate services for your backend and frontend applications.
 
@@ -241,7 +241,7 @@ An ECS service manages the running of tasks of a specific task definition within
 
 3.  **Click "Create service":** Review your frontend service configuration and click "Create service".
 
-## 1.5 IAM Roles and Policies
+### 1.5 IAM Roles and Policies
 
 IAM (Identity and Access Management) roles and policies are crucial for granting necessary permissions to your ECS tasks and the ECS service itself. You need to ensure the following roles are in place:
 

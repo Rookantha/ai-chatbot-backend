@@ -171,36 +171,100 @@ Register the ECS task definitions with the following commands:
 aws ecs register-task-definition --cli-input-json file://backend-task-definition.json
 aws ecs register-task-definition --cli-input-json file://frontend-task-definition.json
 ```
+## 1.3 Setting Up an ECS Cluster
 
-### 1.3 Setting Up an ECS Cluster
+This section guides you through the process of creating an Amazon ECS (Elastic Container Service) cluster, which is a logical grouping of container instances that you can use to run tasks. For this chatbot application, we'll use the Fargate launch type, which allows you to run containers without managing the underlying EC2 instances.
+
 #### 1.3.1 Create ECS Cluster
-Go to the Amazon ECS Console.
 
-Click Create Cluster and choose the Networking Only (Fargate) cluster template.
+1.  **Go to the Amazon ECS Console:** Open your web browser and navigate to the AWS Management Console. Search for "ECS" and click on "Elastic Container Service".
 
-Follow the steps to create the cluster and make a note of the cluster name.
+2.  **Click "Create Cluster":** On the ECS dashboard, you'll see a button labeled "Create Cluster". Click on it to start the cluster creation wizard.
 
-### 1.4 Creating ECS Services for Frontend and Backend
+3.  **Choose the "Networking Only (Fargate)" cluster template:** In the cluster template selection step, select the option labeled **"Networking Only"** and ensure that the **"Powered by AWS Fargate"** option is chosen. This template is designed for running containers directly on AWS Fargate without managing EC2 instances.
+
+4.  **Configure Cluster Settings:**
+    * **Cluster name:** Enter a descriptive name for your ECS cluster, for example, `ai-chatbot-cluster`. **Make a note of this cluster name**, as you'll need it later when configuring your GitHub Actions workflow and ECS services.
+    * **VPC and Subnets (Optional but Recommended):** While Fargate handles the underlying infrastructure, you can choose the VPC (Virtual Private Cloud) and subnets where your tasks will run. It's generally recommended to select a VPC with public and private subnets configured for better network isolation and security. If you don't have a specific VPC in mind, AWS will use your default VPC.
+    * **Security Group (Optional but Recommended):** You can configure a security group for the Fargate tasks within this cluster. This acts as a virtual firewall, controlling inbound and outbound traffic for your containers. You might want to allow inbound traffic on specific ports (e.g., port 80 or 443 for the frontend).
+    * **Tags (Optional):** You can add tags to your ECS cluster for better organization and cost tracking.
+
+5.  **Click "Create":** After configuring the cluster settings, review your choices and click the "Create" button to provision your ECS cluster. The cluster will be created within a few minutes.
+
+## 1.4 Creating ECS Services for Frontend and Backend
+
+An ECS service manages the running of tasks of a specific task definition within your cluster. It ensures that the desired number of tasks are running and automatically replaces any tasks that fail. You'll need to create separate services for your backend and frontend applications.
+
 #### 1.4.1 Backend Service
-Go to the ECS Console and choose Services under your ECS cluster.
 
-Click Create and select the ai-chatbot-backend task definition.
+1.  **Go to the ECS Console and choose "Services" under your ECS cluster:** Navigate to the ECS console, select the cluster you just created (`ai-chatbot-cluster`), and then click on the "Services" tab in the cluster details.
 
-Set the desired number of tasks (e.g., 2) and configure the load balancer (if applicable).
+2.  **Click "Create":** Click the "Create" button to start creating a new ECS service.
 
-Ensure the service runs in the correct VPC and subnets.
+3.  **Configure Service:**
+    * **Launch type:** Ensure "FARGATE" is selected.
+    * **Task definition:** Choose the **`ai-chatbot-backend`** task definition from the dropdown menu. This task definition specifies the Docker image, resource requirements, and other configurations for your backend container.
+    * **Cluster:** Your newly created cluster (`ai-chatbot-cluster`) should be pre-selected.
+    * **Service name:** Enter a name for your backend service, for example, `ai-chatbot-backend-service`. **Make a note of this service name.**
+    * **Number of tasks:** Set the desired number of instances of your backend application you want to run. For example, setting it to `2` will ensure that two backend containers are always running. ECS will automatically manage their lifecycle.
+    * **Deployment configuration:** Leave the default settings (Rolling update) for now.
+    * **Networking:**
+        * **VPC and Subnets:** Select the VPC and subnets where you want your backend tasks to run. These should typically be private subnets if your backend doesn't need direct public internet access.
+        * **Security groups:** Choose the security group(s) that will be associated with your backend tasks. Ensure that it allows necessary inbound traffic (if any) and outbound traffic.
+    * **Load balancing (Optional but Recommended for scaling and availability):** If you plan to have multiple backend instances and want to distribute traffic, you can configure a load balancer. If so:
+        * Choose "Application Load Balancer" or "Network Load Balancer".
+        * Select an existing load balancer or create a new one.
+        * Configure the listener and target group to route traffic to your backend containers on the appropriate port (as defined in your backend task definition's container port mapping).
+    * **Health checks:** Configure health checks to monitor the health of your backend containers. ECS will use these checks to determine if a task is healthy and should receive traffic (if using a load balancer).
+
+4.  **Click "Create service":** Review your configuration and click the "Create service" button.
 
 #### 1.4.2 Frontend Service
-Similarly, create a service for the frontend using the ai-chatbot-frontend task definition.
 
-Configure the frontend service to use the Application Load Balancer (ALB) for routing traffic.
+1.  **Similarly, create a service for the frontend:** Follow the same steps as above (go to the ECS console, select your cluster, click "Services", and then "Create").
 
-### 1.5 IAM Roles and Policies
-Ensure that the following IAM roles and policies are in place for ECS:
+2.  **Configure Frontend Service:**
+    * **Launch type:** Ensure "FARGATE" is selected.
+    * **Task definition:** Choose the **`ai-chatbot-frontend`** task definition.
+    * **Cluster:** Your cluster (`ai-chatbot-cluster`) should be selected.
+    * **Service name:** Enter a name for your frontend service, for example, `ai-chatbot-frontend-service`. **Make a note of this service name.**
+    * **Number of tasks:** Set the desired number of frontend instances (e.g., `1` or more).
+    * **Deployment configuration:** Leave the default settings.
+    * **Networking:**
+        * **VPC and Subnets:** Select the VPC and **public** subnets where you want your frontend tasks to run, as they will likely need to be accessible from the internet.
+        * **Security groups:** Choose the security group(s) for your frontend tasks. Ensure it allows inbound traffic on the port your frontend application listens on (e.g., port 80 for HTTP, port 443 for HTTPS).
+    * **Load balancing (Crucial for the Frontend):** The frontend service typically needs to be accessible via a web browser, so an Application Load Balancer (ALB) is essential for routing traffic to your frontend containers.
+        * Choose "Application Load Balancer".
+        * Select an existing ALB or create a new one.
+        * Configure the listener (e.g., on port 80 or 443) and target group. The target group should forward traffic to the port your frontend container is listening on (as defined in its task definition).
+        * Ensure your ALB is configured with appropriate security group rules to allow inbound traffic from the internet (e.g., HTTP on port 80, HTTPS on port 443).
 
-ECS Task Execution Role: Grants ECS permissions to pull images from ECR, log to CloudWatch, etc.
+3.  **Click "Create service":** Review your frontend service configuration and click "Create service".
 
-Task Role: Grants the backend and frontend services permission to access resources (e.g., secrets for API keys).
+## 1.5 IAM Roles and Policies
+
+IAM (Identity and Access Management) roles and policies are crucial for granting necessary permissions to your ECS tasks and the ECS service itself. You need to ensure the following roles are in place:
+
+* **ECS Task Execution Role:** This IAM role is assumed by the ECS agent running on the Fargate infrastructure. It grants ECS the permissions it needs to manage your tasks on your behalf. This typically includes permissions to:
+    * **Pull Docker images from Amazon ECR:** Allows ECS to download the container images specified in your task definitions.
+    * **Write logs to Amazon CloudWatch Logs:** Enables your container logs to be sent to CloudWatch for monitoring and troubleshooting.
+    * **Potentially interact with other AWS services** depending on your task definition (e.g., Secrets Manager if you're retrieving secrets that way).
+
+    **When creating your ECS task definition, you will specify this Task Execution Role.** You likely created this role when setting up ECS for the first time or you can create a new one in the IAM console with the `AmazonECSTaskExecutionRolePolicy` attached. **Make a note of the ARN (Amazon Resource Name) of this ECS Task Execution Role.**
+
+* **Task Role:** This IAM role is assumed by the containers running within your ECS tasks (i.e., your backend and frontend applications). It grants your application code the permissions it needs to access other AWS resources. For your chatbot application, this role might need permissions to:
+    * **Access secrets stored in AWS Secrets Manager:** If you are following the recommended practice of storing your Google API key (and potentially other sensitive information) in Secrets Manager, your task role needs permission to read these secrets.
+    * **Interact with other AWS services:** Depending on your application's functionality, it might need permissions to access databases (e.g., RDS, DynamoDB), message queues (e.g., SQS, SNS), or other AWS resources.
+
+    **You will create separate Task Roles for your backend and frontend if they require different sets of permissions. When creating your ECS task definitions (`ai-chatbot-backend` and `ai-chatbot-frontend`), you will specify the appropriate Task Role for each.** You can create these roles in the IAM console and attach policies that grant the necessary permissions. **Make a note of the ARNs of your backend and frontend Task Roles.**
+
+**In summary, ensure you have created the following IAM roles and noted their ARNs:**
+
+* **ECS Task Execution Role ARN:** Used by the ECS agent.
+* **Backend Task Role ARN:** Used by your backend containers.
+* **Frontend Task Role ARN:** Used by your frontend containers.
+
+You will need these ARNs when configuring your ECS task definitions and potentially in other parts of your AWS setup.
 
 ## 2. CI/CD Pipeline with GitHub Actions
 

@@ -1,4 +1,4 @@
-## Deployment Guide for AI Chatbot
+# Deployment Guide for AI Chatbot
 
 This guide explains the step-by-step process of deploying the containerized frontend (Next.js) and backend (Python FastAPI) services to AWS Elastic Container Service (ECS) using the Fargate launch type. It also outlines the process of setting up a CI/CD pipeline with GitHub Actions to automate the deployment process.
 

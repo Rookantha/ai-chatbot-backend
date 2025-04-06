@@ -252,21 +252,35 @@ jobs:
       run: |
         aws ecs update-service --cluster ai-chatbot-cluster --service ai-chatbot-frontend-service --force-new-deployment
 ```
+
 ### 2.2 Managing Secrets in GitHub Actions
-Store sensitive information like AWS credentials and Google API Key in GitHub Secrets:
 
-Go to the GitHub repository Settings.
+To securely store sensitive information like AWS credentials and your Google API Key for use in GitHub Actions, follow these steps:
 
-Under Secrets > New Repository Secret, add the following secrets:
+1.  **Navigate to your GitHub repository Settings.**
+2.  **Go to Secrets > Actions** in the left-hand sidebar.
+3.  **Click "New repository secret"** (usually a green button).
+4.  **Add the following secrets individually:**
 
-AWS_ACCESS_KEY_ID
+    * **Name:** `AWS_ACCESS_KEY_ID`
+        * **Secret:** Your actual AWS access key ID.
 
-AWS_SECRET_ACCESS_KEY
+    * **Click "Add secret"**.
 
-GOOGLE_API_KEY
+    * **Name:** `AWS_SECRET_ACCESS_KEY`
+        * **Secret:** Your actual AWS secret access key.
 
-In your GitHub Actions workflow, you can reference these secrets as environment variables:
+    * **Click "Add secret"**.
 
+    * **(Optional) For your Google API Key (recommended):**
+        * **Name:** `GOOGLE_API_KEY`
+        * **Secret:** Your actual Google API key.
+
+    * **Click "Add secret"**.
+
+Once these secrets are added, you can securely access them within your GitHub Actions workflows.
+
+**Important Security Note:** Avoid hardcoding sensitive information directly in your workflow files. Using GitHub Secrets is a much more secure way to manage credentials.
 ``` yaml
 
 env:

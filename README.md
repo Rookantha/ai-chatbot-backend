@@ -221,16 +221,14 @@ env:
   GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
 ```
 
-## 3. Deliverables
-Frontend GitHub Repository URL: https://github.com/Rookantha/ai-chatbot-frontend.git
 
-Backend GitHub Repository URL: https://github.com/Rookantha/ai-chatbot-backend.git
+## 3. Deliverables  
+Frontend GitHub Repository URL: [https://github.com/Rookantha/ai-chatbot-frontend.git](https://github.com/Rookantha/ai-chatbot-frontend.git)  
+
+Backend GitHub Repository URL: [https://github.com/Rookantha/ai-chatbot-backend.git](https://github.com/Rookantha/ai-chatbot-backend.git)  
 
 
-``` php-template
 
-Let me know if you need further adjustments or additional details! &#8203;:contentReference[oaicite:0]{index=0}&#8203;
-```
 
 
 

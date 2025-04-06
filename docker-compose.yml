@@ -8,7 +8,7 @@ services:
     ports:
       - "8000:8000"  # Expose backend on port 8000
     environment:
-      - GOOGLE_API_KEY=your-google-api-key  # Environment variable for the backend
+      - GOOGLE_API_KEY=AIzaSyDyM1MPHzMUIgSkjq4xb3pMbuGtXrjcqhg  # Environment variable for the backend
     networks:
       - ai-chatbot-net
 

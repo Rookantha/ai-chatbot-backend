@@ -286,7 +286,7 @@ jobs:
       - name: Update ECS service for Frontend
         run: |
           aws ecs update-service --cluster ai-chatbot-cluster --service ai-chatbot-frontend-service --force-new-deployment
-
+```
 ### 2.2 Managing Secrets in GitHub Actions
 
 To securely store sensitive information like AWS credentials and your Google API Key for use in GitHub Actions, follow these steps:

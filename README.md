@@ -203,55 +203,89 @@ ECS Task Execution Role: Grants ECS permissions to pull images from ECR, log to 
 Task Role: Grants the backend and frontend services permission to access resources (e.g., secrets for API keys).
 
 ## 2. CI/CD Pipeline with GitHub Actions
+
+This section describes how to create a Continuous Integration/Continuous Deployment (CI/CD) pipeline using GitHub Actions to automate the build and deployment of your backend and frontend applications to Amazon ECS.
+
 ### 2.1 GitHub Actions Workflow for Backend and Frontend
-Create a .github/workflows/deploy.yml file in your repositories to automate the CI/CD pipeline.
 
-``` yaml
+You need to create a file named `.github/workflows/deploy.yml` in the root of **each** of your repositories (both the backend and the frontend repositories). This workflow file defines the automated process that will run whenever code is pushed to the `main` branch.
 
+```yaml
 name: Deploy to ECS
 
+# This defines when the workflow will trigger.
 on:
   push:
     branches:
-      - main
+      - main # The workflow will run when code is pushed to the 'main' branch.
 
+# Defines the jobs that will be executed in the workflow.
 jobs:
   build-and-deploy:
+    # Specifies the type of machine to run the job on.
     runs-on: ubuntu-latest
 
+    # Defines the sequence of tasks to be executed in the job.
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      # Step 1: Checkout code
+      # This action checks out your repository code from GitHub onto the runner.
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      # Step 2: Set up Docker Buildx
+      # Docker Buildx is a CLI plugin that extends the functionality of the docker build command with support for builder instances and new features.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Log in to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v1
+      # Step 3: Log in to Amazon ECR
+      # This action authenticates the GitHub Actions runner with your Amazon Elastic Container Registry (ECR).
+      # It uses the AWS credentials configured as GitHub Secrets (AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY).
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build Docker images
-      run: |
-        docker build -t ai-chatbot-backend .
-        docker build -t ai-chatbot-frontend .
+      # Step 4: Build Docker images
+      # This step builds the Docker images for your backend and frontend applications.
+      # It assumes that you have Dockerfiles in the root of your respective repositories.
+      - name: Build Docker images
+        run: |
+          docker build -t ai-chatbot-backend .  # Builds the backend image, tagging it as 'ai-chatbot-backend'
+          docker build -t ai-chatbot-frontend .  # Builds the frontend image, tagging it as 'ai-chatbot-frontend'
 
-    - name: Tag Docker images
-      run: |
-        docker tag ai-chatbot-backend:latest <aws_account_id>.dkr.ecr.<region>.amazonaws.com/ai-chatbot-backend:latest
-        docker tag ai-chatbot-frontend:latest <aws_account_id>.dkr.ecr.<region>.amazonaws.com/ai-chatbot-frontend:latest
+      # Step 5: Tag Docker images
+      # This step tags the locally built Docker images with the full ECR repository URI.
+      # This is necessary for pushing the images to the correct ECR repository.
+      # You need to replace `<aws_account_id>` and `<region>` with your actual AWS account ID and region.
+      - name: Tag Docker images
+        run: |
+          docker tag ai-chatbot-backend:latest <aws_account_id>.dkr.ecr.<region>[.amazonaws.com/ai-chatbot-backend:latest](https://www.google.com/search?q=https://.amazonaws.com/ai-chatbot-backend:latest)
+          docker tag ai-chatbot-frontend:latest <aws_account_id>.dkr.ecr.<region>[.amazonaws.com/ai-chatbot-frontend:latest](https://www.google.com/search?q=https://.amazonaws.com/ai-chatbot-frontend:latest)
 
-    - name: Push Docker images to ECR
-      run: |
-        docker push <aws_account_id>.dkr.ecr.<region>.amazonaws.com/ai-chatbot-backend:latest
-        docker push <aws_account_id>.dkr.ecr.<region>.amazonaws.com/ai-chatbot-frontend:latest
+      # Step 6: Push Docker images to ECR
+      # This step pushes the tagged Docker images to your Amazon ECR repositories.
+      # Ensure that the ECR repositories (ai-chatbot-backend and ai-chatbot-frontend) exist in your AWS account.
+      - name: Push Docker images to ECR
+        run: |
+          docker push <aws_account_id>.dkr.ecr.<region>[.amazonaws.com/ai-chatbot-backend:latest](https://www.google.com/search?q=https://.amazonaws.com/ai-chatbot-backend:latest)
+          docker push <aws_account_id>.dkr.ecr.<region>[.amazonaws.com/ai-chatbot-frontend:latest](https://www.google.com/search?q=https://.amazonaws.com/ai-chatbot-frontend:latest)
 
-    - name: Update ECS service for Backend
-      run: |
-        aws ecs update-service --cluster ai-chatbot-cluster --service ai-chatbot-backend-service --force-new-deployment
+      # Step 7: Update ECS service for Backend
+      # This step instructs ECS to update the backend service with the newly pushed Docker image.
+      # `--cluster ai-chatbot-cluster`: Specifies the name of your ECS cluster.
+      # `--service ai-chatbot-backend-service`: Specifies the name of your backend ECS service.
+      # `--force-new-deployment`: Forces a new deployment of the service, ensuring the latest image is pulled and the tasks are updated.
+      # You need to have the AWS CLI configured in your GitHub Actions environment (which is done by the ecr-login action).
+      - name: Update ECS service for Backend
+        run: |
+          aws ecs update-service --cluster ai-chatbot-cluster --service ai-chatbot-backend-service --force-new-deployment
 
-    - name: Update ECS service for Frontend
-      run: |
-        aws ecs update-service --cluster ai-chatbot-cluster --service ai-chatbot-frontend-service --force-new-deployment
-```
+      # Step 8: Update ECS service for Frontend
+      # This step does the same as the previous step but for the frontend ECS service.
+      # `--cluster ai-chatbot-cluster`: Specifies the name of your ECS cluster.
+      # `--service ai-chatbot-frontend-service`: Specifies the name of your frontend ECS service.
+      # `--force-new-deployment`: Forces a new deployment of the service.
+      - name: Update ECS service for Frontend
+        run: |
+          aws ecs update-service --cluster ai-chatbot-cluster --service ai-chatbot-frontend-service --force-new-deployment
 
 ### 2.2 Managing Secrets in GitHub Actions
 

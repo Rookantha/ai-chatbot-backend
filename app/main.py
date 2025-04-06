@@ -1,6 +1,8 @@
+# app/main.py
 from fastapi import FastAPI
-from app.api import router as chat_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.chat import router  # <-- Import the router correctly
+from app.logger import logger
 
 app = FastAPI()
 
@@ -13,4 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(chat_router)
+# Include the router for chat API
+app.include_router(router)  # <-- Include the router instead of chat_router
+
+# Log that the app is running
+logger.info("FastAPI app is running")

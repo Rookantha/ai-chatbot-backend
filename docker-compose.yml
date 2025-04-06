@@ -3,18 +3,18 @@ version: '3.9'
 services:
   backend:
     build:
-      context: ./backend  # Build context for the backend (path to the backend repo)
+      context: ./  # Point to the backend directory
     container_name: ai-chatbot-backend
     ports:
       - "8000:8000"  # Expose backend on port 8000
     environment:
-      - GOOGLE_API_KEY=AIzaSyDyM1MPHzMUIgSkjq4xb3pMbuGtXrjcqhg  # Environment variable for the backend
+      - GOOGLE_API_KEY=AIzaSyDyM1MPHzMUIgSkjq4xb3pMbuGtXrjcqhg # Use environment variables securely
     networks:
       - ai-chatbot-net
 
   frontend:
     build:
-      context: ./frontend  # Build context for the frontend (path to the frontend repo)
+      context: ../ai-chatbot-frontend  # Point to the frontend directory
     container_name: ai-chatbot-frontend
     ports:
       - "3000:3000"  # Expose frontend on port 3000

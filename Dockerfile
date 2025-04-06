@@ -10,6 +10,9 @@ COPY requirements.txt .
 # Install the required Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Make sure uvicorn is installed
+RUN pip install uvicorn
+
 # Stage 2: Create a minimal image with only the necessary files
 FROM python:3.9-slim
 

@@ -1,4 +1,4 @@
-# app/api/chat.py
+
 from fastapi import APIRouter
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.google_service import get_ai_response

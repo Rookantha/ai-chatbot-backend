@@ -1,4 +1,3 @@
-# app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.chat import router  
@@ -6,7 +5,7 @@ from app.logger import logger
 
 app = FastAPI()
 
-# Configure CORS to allow requests from your frontend (adjust origin as needed)
+# Configure CORS to allow requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"], 

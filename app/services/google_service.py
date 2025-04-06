@@ -1,4 +1,3 @@
-# app/services/google_service.py
 import os
 import requests
 from app.exceptions.errors import GoogleAPIError

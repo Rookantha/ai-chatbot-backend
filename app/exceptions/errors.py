@@ -1,4 +1,3 @@
-# app/exceptions/errors.py
 from fastapi import HTTPException
 
 class GoogleAPIError(HTTPException):
